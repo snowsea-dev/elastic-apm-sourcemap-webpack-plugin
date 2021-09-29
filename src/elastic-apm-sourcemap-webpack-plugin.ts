@@ -15,6 +15,7 @@ export interface Config {
   publicPath: string;
   serverURL: string;
   secret?: string;
+  apiKey?: string;
   logLevel?: Level;
   ignoreErrors?: boolean;
 }
@@ -80,9 +81,14 @@ export default class ElasticAPMSourceMapPlugin implements WebpackPluginInstance 
         formData.append('bundle_filepath', bundleFilePath);
         formData.append('service_name', this.config.serviceName);
 
-        const headers = this.config.secret
-          ? { Authorization: `Bearer ${this.config.secret}` }
-          : undefined;
+        const headers: Record<string, string> = {};
+
+        if (this.config.secret) {
+          headers.Authorization = `Bearer ${this.config.secret}`;
+        }
+        if (this.config.apiKey) {
+          headers.Authorization = `ApiKey ${this.config.apiKey}`;
+        }
 
         logger.debug(
           `uploading ${sourceMap} to Elastic APM with bundle_filepath: ${bundleFilePath}.`
